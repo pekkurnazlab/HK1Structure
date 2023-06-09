@@ -1,0 +1,259 @@
+
+#############################################################
+# COLVARS DEFINITIONS
+#############################################################
+# Selection Atom numbers (serial in VMD)
+# # L1
+# atomnumbers { 14463 14464 14465 14466 14467 }
+# # L2
+# atomnumbers { 14453 14454 14455 14459 14460 14461 }
+# # L3
+# atomnumbers { 14452 14456 14458 14462 }
+# # P1
+# atomnumbers { 4074 4076 4085 4086 }
+# # P2
+# atomnumbers { 4689 4691 4704 4705 }
+# # P3
+# atomnumbers { 2956 2958 2970 2971 }
+# # LigandHeavy
+# atomnumbers { 14452 14453 14454 14455 14456 14457 14458 14459 14460 14461 14462 14463 14464 14465 14466 14467 }
+
+
+colvar {
+   name r
+
+   width 1.0
+
+   lowerboundary 18.0
+   upperboundary 40.0
+
+
+   distance {
+      forceNoPBC     yes
+      group1 {
+	  # L1
+	  atomnumbers { 14463 14464 14465 14466 14467 }
+      }
+      group2 {
+	  # P1
+	  atomnumbers { 4074 4076 4085 4086 }
+      }
+   }
+}
+
+
+colvar {
+   name Theta        
+
+   width 1.0
+
+   lowerboundary   0.0
+   upperboundary 180.0
+
+
+   angle {
+      group1 {
+	  # L1
+	  atomnumbers { 14463 14464 14465 14466 14467 }
+      }
+      group2  {
+	  # L2
+	  atomnumbers { 14453 14454 14455 14459 14460 14461 }
+      }
+      group3  {
+	  # P1
+	  atomnumbers { 4074 4076 4085 4086 }
+      }
+   }
+}
+
+
+colvar {
+   name Phi
+
+   width 1.0
+
+   lowerboundary -180.0
+   upperboundary  180.0
+
+
+   dihedral {
+      group1 {
+	  # L1
+	  atomnumbers { 14463 14464 14465 14466 14467 }
+      }
+      group2  {
+	  # L2
+	  atomnumbers { 14453 14454 14455 14459 14460 14461 }
+      }
+      group3  {
+	  # L3
+	  atomnumbers { 14452 14456 14458 14462 }
+      }
+      group4  {
+	  # P1
+	  atomnumbers { 4074 4076 4085 4086 }	   
+      }
+   }
+}
+
+
+colvar {
+   name Psi
+
+   width 1.0
+ 
+   lowerboundary -180.0
+   upperboundary  180.0     
+
+
+   dihedral {
+      group1 {
+	  # L1
+	  atomnumbers { 14463 14464 14465 14466 14467 }
+      }
+      group2  {
+	  # L2
+	  atomnumbers { 14453 14454 14455 14459 14460 14461 }
+      }
+      group3  {
+	  # P1
+	  atomnumbers { 4074 4076 4085 4086 }
+      }
+      group4  {
+	  # P2
+	  atomnumbers { 4689 4691 4704 4705 }
+      }
+   }
+}
+ 
+
+colvar {
+   name theta        
+
+   width 1.0
+
+   lowerboundary   0.0
+   upperboundary 180.0
+
+
+   angle {
+      group1 {
+	  # L1
+	  atomnumbers { 14463 14464 14465 14466 14467 }
+      }
+      group2  {
+	  # P1
+	  atomnumbers { 4074 4076 4085 4086 }
+      }
+      group3  {
+	  # P2
+	  atomnumbers { 4689 4691 4704 4705 }
+      }
+   }
+}
+
+
+colvar {
+   name phi
+
+   width 1.0
+
+   lowerboundary -180.0
+   upperboundary  180.0
+
+
+   dihedral {
+      group1 {
+	  # L1
+	  atomnumbers { 14463 14464 14465 14466 14467 }
+      }
+      group2  {
+	  # P1
+	  atomnumbers { 4074 4076 4085 4086 }
+      }
+      group3  {
+	  # P2
+	  atomnumbers { 4689 4691 4704 4705 }
+      }
+      group4  {
+	  # P3
+	  atomnumbers { 2956 2958 2970 2971 }
+      }
+   }
+}
+
+
+colvar {
+  name RMSD
+
+  width 1.0  
+
+  lowerboundary 0.0
+  upperboundary 5.0
+
+
+  rmsd {
+    atoms {
+	# Ligand Heavy Atoms RMSD
+	atomnumbers { 14452 14453 14454 14455 14456 14457 14458 14459 14460 14461 14462 14463 14464 14465 14466 14467 }
+    }
+    refpositionsfile ../Build/complex_solv-ion.pdb
+  }
+} 
+
+
+
+#############################################################
+# RESTRAINTS AND PMF
+#############################################################
+
+
+harmonic {
+   colvars        r
+   forceConstant  10.0 
+   centers        20.6968
+}
+
+
+harmonic {
+   colvars        Theta
+   forceConstant  0.1  
+   centers        99.6927
+}
+
+
+harmonic {
+   colvars        Phi   
+   forceConstant  0.1  
+   centers        68.5037
+}
+
+
+harmonic {
+   colvars        Psi   
+   forceConstant  0.1  
+   centers        -32.8081
+}
+
+
+harmonic {
+   colvars        theta
+   forceConstant  0.1  
+   centers        26.7643
+}
+
+
+harmonic {
+   colvars        phi   
+   forceConstant  0.1  
+   centers        30.6321
+}
+
+
+harmonic {
+   colvars        RMSD
+   forceConstant  10.0  
+   centers        0.0  
+}
+

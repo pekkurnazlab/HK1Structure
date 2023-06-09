@@ -1,0 +1,10 @@
+#!/bin/bash
+module load namd/2.14-cpu
+numreps=20
+namdScript=job1.conf
+cd /ocean/projects/mcb200112p/jvant/REST2/simulations/rest2/1cza_OGLCNAC_wo_g6p
+
+mpirun -N 1 -np ${numreps} /opt/packages/namd/namd-2.14/RM/namd2 +setcpuaffinity +ppn 127 +replicas ${numreps} +stdout output/%d/rest2.${namdScript%.*}.log ${namdScript}
+
+exit
+

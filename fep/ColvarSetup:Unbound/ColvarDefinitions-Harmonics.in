@@ -1,0 +1,35 @@
+
+#############################################################
+# COLVARS DEFINITIONS
+#############################################################
+# Selection Atom numbers (serial in VMD)
+# # LigandHeavy
+# atomnumbers { 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 }
+
+colvar {
+  name RMSD
+
+  width 1.0  
+
+  lowerboundary 0.0
+  upperboundary 5.0
+
+
+  rmsd {
+    atoms {
+	# Ligand Heavy Atoms RMSD
+	atomnumbers { 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 }
+    }
+    refpositionsfile ../Build/ligand_solv-ion.pdb
+  }
+} 
+
+#############################################################
+# RESTRAINTS AND PMF
+#############################################################
+harmonic {
+   colvars        RMSD
+   forceConstant  10.0  
+   centers        0.0  
+}
+

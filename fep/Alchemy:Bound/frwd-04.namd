@@ -1,0 +1,176 @@
+
+##################################################
+# MD SECTION
+##################################################
+set temperature      300.0
+set outname          frwd-04
+set alchfile         complex
+set lambdaStart      0.97
+set lambdaFinish     1.0
+set lambdaStep       0.01
+set restart_root_name frwd-03
+
+# NUMBER OF MD-STEPS
+numsteps             1
+
+# TOPOLOGY
+structure            ../Build/${alchfile}_solv-ion.psf
+
+# FORCE FIELD
+paraTypeCharmm          on
+parameters              ../charmm/par_all36m_prot.prm
+parameters              ../charmm/par_all36_na.prm
+parameters              ../charmm/par_all36_carb.prm
+parameters              ../charmm/par_all36_lipid.prm
+parameters              ../charmm/par_all36_cgenff.prm
+parameters              ../charmm/par_interface.prm
+parameters              ../charmm/G6P_wH.par
+parameters              ../charmm/toppar_all36_nano_lig.str
+parameters              ../charmm/toppar_all36_nanolig_patch.str
+parameters              ../charmm/toppar_water_ions_namd.str
+parameters              ../charmm/toppar_dum_noble_gases.str
+parameters              ../charmm/toppar_all36_prot_arg0.str
+parameters              ../charmm/toppar_all36_prot_c36m_d_aminoacids.str
+parameters              ../charmm/toppar_all36_prot_fluoro_alkanes.str
+parameters              ../charmm/toppar_all36_prot_heme.str
+parameters              ../charmm/toppar_all36_prot_na_combined.str
+parameters              ../charmm/toppar_all36_prot_retinol.str
+parameters              ../charmm/toppar_all36_prot_modify_res.str
+parameters              ../charmm/toppar_all36_na_nad_ppi.str
+parameters              ../charmm/toppar_all36_na_rna_modified.str
+parameters              ../charmm/toppar_all36_lipid_bacterial.str
+parameters              ../charmm/toppar_all36_lipid_cardiolipin.str
+parameters              ../charmm/toppar_all36_lipid_cholesterol.str
+parameters              ../charmm/toppar_all36_lipid_dag.str
+parameters              ../charmm/toppar_all36_lipid_inositol.str
+parameters              ../charmm/toppar_all36_lipid_lps.str
+parameters              ../charmm/toppar_all36_lipid_miscellaneous.str
+parameters              ../charmm/toppar_all36_lipid_model.str
+parameters              ../charmm/toppar_all36_lipid_prot.str
+parameters              ../charmm/toppar_all36_lipid_sphingo.str
+parameters              ../charmm/toppar_all36_lipid_yeast.str
+parameters              ../charmm/toppar_all36_lipid_hmmm.str
+parameters              ../charmm/toppar_all36_lipid_detergent.str
+parameters              ../charmm/toppar_all36_lipid_ether.str
+parameters              ../charmm/toppar_all36_carb_glycolipid.str
+parameters              ../charmm/toppar_all36_carb_glycopeptide.str
+parameters              ../charmm/toppar_all36_carb_imlab.str
+
+# 1-4 TERMs
+exclude              scaled1-4
+1-4scaling           1.0
+
+
+# INPUT FILES
+coordinates          ../Build/${alchfile}_solv-ion.pdb
+bincoordinates       ${restart_root_name}.coor
+binvelocities        ${restart_root_name}.vel
+
+# EXTENDED SYSTEM
+ExtendedSystem       ${restart_root_name}.xsc
+
+
+# OUTPUT FILES
+binaryoutput         no  
+binaryrestart        yes
+outputname           ${outname}_0
+restartname          ${outname}
+
+
+# DCD FILE
+dcdFile              ${outname}.dcd
+dcdUnitCell          yes
+
+
+# FREQUENCY FOR DUMPING OUTPUT DATA
+outputenergies       500
+outputtiming         500
+outputpressure       500
+restartfreq          500 
+XSTFreq              500 
+dcdFreq              500
+
+
+# CUT-OFFs
+hgroupcutoff         2.8
+switching            on
+switchdist           10.0
+cutoff               12.0
+pairlistdist         14.0
+
+
+# WRAPPING
+wrapAll              on 
+
+
+# CONSTANT-T
+langevin             on
+langevintemp         $temperature
+langevindamping      1.0 
+
+
+# CONSTANT-P
+langevinpiston       on 
+langevinpistontarget 1 
+langevinpistonperiod 100
+langevinpistondecay  100
+langevinpistontemp   $temperature
+StrainRate           0.0 0.0 0.0
+useGroupPressure     yes
+
+
+# PME
+PME                  yes
+PMETolerance         10e-6
+PMEInterpOrder       4
+PMEGridSpacing       1   
+
+
+# MULTIPLE TIME-STEP PROPAGATOR
+timestep             2.0
+fullelectfrequency   2
+nonbondedfreq        1
+
+
+# SHAKE/RATTLE
+rigidbonds           all   
+rigidtolerance       0.00001
+rigiditerations      400
+
+
+# PARALLELISM
+stepspercycle        20
+splitpatch           hydrogen
+
+
+##################################################
+# ABF SECTION
+##################################################
+colvars              on
+colvarsConfig        ../ColvarSetup:Bound/ColvarDefinitions-Harmonics.in
+# cv config "
+# Colvarstrajfrequency    500
+# Colvarsrestartfrequency 500
+# "
+##################################################
+# FEP SECTION
+##################################################
+source               ../Toolkit/fep.tcl
+alch                 on
+alchType             FEP
+alchFile             ../Build/${alchfile}.fep
+alchCol              B
+alchOutFile          ${outname}.fepout
+alchOutFreq          10
+
+alchVdwLambdaEnd     1.0
+alchElecLambdaStart  0.5
+alchVdWShiftCoeff    4.0
+alchDecouple         off
+
+alchEquilSteps       100000
+set numSteps         400000
+set numMinSteps      1000
+
+runFEPmin $lambdaStart $lambdaFinish $lambdaStep  $numSteps $numMinSteps $temperature
+

@@ -1,0 +1,136 @@
+set sys ligand
+
+set temperature 300.0
+set logfreq 500
+set dcdfreq 2500
+set restartfreq 25000
+
+# Input
+structure   ../Build/${sys}_solv-ion.psf
+coordinates ../Build/${sys}_solv-ion.pdb
+
+paraTypeCharmm          on
+parameters              ../charmm/par_all36m_prot.prm
+parameters              ../charmm/par_all36_na.prm
+parameters              ../charmm/par_all36_carb.prm
+parameters              ../charmm/par_all36_lipid.prm
+parameters              ../charmm/par_all36_cgenff.prm
+parameters              ../charmm/par_interface.prm
+parameters              ../charmm/G6P_wH.par
+parameters              ../charmm/toppar_all36_nano_lig.str
+parameters              ../charmm/toppar_all36_nanolig_patch.str
+parameters              ../charmm/toppar_water_ions_namd.str
+parameters              ../charmm/toppar_dum_noble_gases.str
+parameters              ../charmm/toppar_all36_prot_arg0.str
+parameters              ../charmm/toppar_all36_prot_c36m_d_aminoacids.str
+parameters              ../charmm/toppar_all36_prot_fluoro_alkanes.str
+parameters              ../charmm/toppar_all36_prot_heme.str
+parameters              ../charmm/toppar_all36_prot_na_combined.str
+parameters              ../charmm/toppar_all36_prot_retinol.str
+parameters              ../charmm/toppar_all36_prot_modify_res.str
+parameters              ../charmm/toppar_all36_na_nad_ppi.str
+parameters              ../charmm/toppar_all36_na_rna_modified.str
+parameters              ../charmm/toppar_all36_lipid_bacterial.str
+parameters              ../charmm/toppar_all36_lipid_cardiolipin.str
+parameters              ../charmm/toppar_all36_lipid_cholesterol.str
+parameters              ../charmm/toppar_all36_lipid_dag.str
+parameters              ../charmm/toppar_all36_lipid_inositol.str
+parameters              ../charmm/toppar_all36_lipid_lps.str
+parameters              ../charmm/toppar_all36_lipid_miscellaneous.str
+parameters              ../charmm/toppar_all36_lipid_model.str
+parameters              ../charmm/toppar_all36_lipid_prot.str
+parameters              ../charmm/toppar_all36_lipid_sphingo.str
+parameters              ../charmm/toppar_all36_lipid_yeast.str
+parameters              ../charmm/toppar_all36_lipid_hmmm.str
+parameters              ../charmm/toppar_all36_lipid_detergent.str
+parameters              ../charmm/toppar_all36_lipid_ether.str
+parameters              ../charmm/toppar_all36_carb_glycolipid.str
+parameters              ../charmm/toppar_all36_carb_glycopeptide.str
+parameters              ../charmm/toppar_all36_carb_imlab.str
+
+#Force field modifications
+switching on
+VDWForceSwitching on
+switchDist 10.0
+cutoff 12.0
+pairlistDist 14.0
+exclude scaled1-4
+1-4scaling 1.0
+dielectric          1
+
+stepspercycle       20
+pairlistsPerCycle   2;                  # 2 is the default
+margin              20.0
+rigidBonds          ALL
+timestep            2.0
+
+#Thermostat. I always use a damping coefficient of 1, but that might be my membrane bias.
+langevin                on
+langevinTemp            $temperature
+langevinDamping         1.0
+langevinHydrogen        no
+
+# constant pressure
+langevinPiston          on
+langevinPistonTarget    1.01325
+langevinPistonPeriod    50.0
+langevinPistonDecay     25.0
+langevinPistonTemp      $temperature
+
+
+# Standard output frequencies
+outputEnergies          $logfreq
+outputTiming            $logfreq
+DCDFreq                 $dcdfreq
+restartfreq             $restartfreq
+
+# Step Control
+
+temperature             ${temperature}
+reassignFreq            500;                # reassignFreq:  use this to reassign velocity every 500 steps
+reassignTemp            $temperature;
+
+#######
+# Set I/O parameters
+#######
+
+#Set outputname
+outputname minimize
+
+# Read PBC data into configuration file
+# Slurp up the data file
+
+set fp [open "../Build/${sys}-PBC_Values.str" r]
+set file_data [read $fp]
+close $fp
+set data [split $file_data "
+"]
+set a [lindex $data 0 0]
+set b [lindex $data 0 1]
+set c [lindex $data 0 2]
+set xcen [lindex $data 1 0]
+set ycen [lindex $data 1 1]
+set zcen [lindex $data 1 2]
+cellBasisVector1     $a   0.0   0.0
+cellBasisVector2    0.0    $b   0.0
+cellBasisVector3    0.0   0.0    $c
+cellOrigin          $xcen $ycen $zcen
+
+
+# PME (for full-system periodic electrostatics)
+PME                     yes;
+PMEInterpOrder          6;
+PMEGridSpacing          1.0;
+
+# Pressure and volume control
+useGroupPressure        yes
+useFlexibleCell         no
+useConstantRatio        no
+
+wrapWater               on
+wrapAll                 on
+wrapNearest             off
+
+# Run command
+minimize                100
+run                     10000
